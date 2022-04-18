@@ -9,10 +9,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Goals">
         <activity
+            android:name=".GoalActivity"
+            android:exported="false"
+            android:label="@string/my_goal"
+            android:theme="@style/Theme.Goals.NoActionBar" />
+        <activity
+            android:name=".NewGoalActivity"
+            android:exported="false" />
+        <activity
             android:name=".GoalsActivity"
             android:exported="false"
-            android:label="@string/title_activity_goals"
-            android:theme="@style/Theme.Goals.NoActionBar" />
+            android:label="@string/my_goals" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />

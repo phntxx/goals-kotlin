@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">Goals</string>
-    <string name="title_activity_goals">GoalsActivity</string>
-    <string name="icon_desc">Goals Icon</string>
-    <string name="sign_in_error">Something went wrong. Please try again.</string>
-    <string name="log_out_button">Log out</string>
+    <string name="goals_icon">Goals Icon</string>
+
+    <string name="my_goals">My goals</string>
+    <string name="my_goal">My goal</string>
+    <string name="goal_title">Goal title</string>
+    <string name="add_goal">Add goal</string>
+
+    <string name="log_out">Log out</string>
+
+    <string name="something_went_wrong">Something went wrong. Please try again.</string>
 </resources>

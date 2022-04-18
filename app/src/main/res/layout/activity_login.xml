@@ -25,7 +25,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/ic_launcher"
-            android:contentDescription="@string/icon_desc" />
+            android:contentDescription="@string/goals_icon" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier2"

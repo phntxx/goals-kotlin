@@ -2,26 +2,16 @@ package dev.phntxx.goals
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dev.phntxx.goals.databinding.ActivityLoginBinding
-
 
 class LoginActivity : AppCompatActivity() {
 
@@ -56,27 +46,29 @@ class LoginActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val currentUser = auth.currentUser
-        updateUI(currentUser)
+        updateUI(currentUser, true)
     }
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         if (result.resultCode == RESULT_OK) {
-            updateUI(auth.currentUser)
+            updateUI(auth.currentUser, false)
         } else {
-            updateUI(null)
+            updateUI(null, false)
         }
     }
 
-    private fun updateUI(account: FirebaseUser?){
-        if (account == null) {
-            Toast.makeText(
-                applicationContext,
-                getString(R.string.sign_in_error),
-                Toast.LENGTH_LONG
-            ).show()
-        } else {
+    private fun updateUI(account: FirebaseUser?, onStart: Boolean){
+        if (account != null) {
             var goalsActivityIntent = Intent(this, GoalsActivity::class.java)
             startActivity(goalsActivityIntent)
+        } else {
+            val errorMessage = Toast.makeText(
+                applicationContext,
+                getString(R.string.something_went_wrong),
+                Toast.LENGTH_LONG
+            )
+
+            if (!onStart) errorMessage.show()
         }
     }
 
