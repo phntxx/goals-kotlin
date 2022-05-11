@@ -32,10 +32,10 @@ class GoalActivity : AppCompatActivity() {
 
         database
             .collection("goals")
-            .document(intent.getStringExtra("goal_id")!!)
+            .document(intent.getStringExtra("goalId")!!)
             .get()
             .addOnSuccessListener { document ->
-                if (document != null && document.get("created_by") == auth.currentUser!!.uid) {
+                if (document != null && document.get("uid") == auth.currentUser!!.uid) {
                     goal = document
                     updateUI()
                 } else {
