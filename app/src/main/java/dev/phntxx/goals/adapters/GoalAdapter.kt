@@ -35,8 +35,10 @@ class GoalAdapter(options: FirestoreRecyclerOptions<GoalModel>) : FirestoreRecyc
             binding.goalTitle.text = goal.title
 
             binding.root.setOnClickListener { view ->
+                val goalId = snapshots.getSnapshot(position).id
+                Log.d(TAG, goalId)
                 val goalActivityIntent = Intent(view.context, GoalActivity::class.java)
-                goalActivityIntent.putExtra("goalId", snapshots.getSnapshot(position).id)
+                goalActivityIntent.putExtra("goalId", goalId)
                 view.context.startActivity(goalActivityIntent)
             }
         }
