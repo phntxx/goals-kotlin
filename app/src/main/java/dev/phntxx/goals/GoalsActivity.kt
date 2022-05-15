@@ -5,41 +5,24 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.FirebaseFirestore
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import dev.phntxx.goals.adapters.FirebaseAdapter
 
 import dev.phntxx.goals.adapters.GoalAdapter
 import dev.phntxx.goals.databinding.ActivityGoalsBinding
-import dev.phntxx.goals.models.GoalModel
-
 
 class GoalsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGoalsBinding
-    private lateinit var auth: FirebaseAuth
-    private lateinit var database: FirebaseFirestore
+    private lateinit var firebase: FirebaseAdapter
     private lateinit var adapter: GoalAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        auth = Firebase.auth
-        database = Firebase.firestore
+        firebase = FirebaseAdapter()
         binding = ActivityGoalsBinding.inflate(layoutInflater)
 
-        val query = database
-            .collection("goals")
-            .whereEqualTo("uid", auth.currentUser!!.uid)
-
-        val options = FirestoreRecyclerOptions.Builder<GoalModel>()
-            .setQuery(query, GoalModel::class.java)
-            .build()
-
-        adapter = GoalAdapter(options)
+        adapter = firebase.buildGoalAdapter()
 
         binding.newGoalButton.setOnClickListener {
             val intent = Intent(this, NewGoalActivity::class.java)
@@ -83,7 +66,7 @@ class GoalsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == R.id.log_out_option) {
-            auth.signOut()
+            firebase.signOut()
             finish()
         }
 

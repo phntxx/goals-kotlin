@@ -7,22 +7,23 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dev.phntxx.goals.adapters.FirebaseAdapter
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth
+    private lateinit var firebase: FirebaseAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = Firebase.auth
+        firebase = FirebaseAdapter()
     }
 
     override fun onStart() {
         super.onStart()
 
-        if (auth.currentUser != null) {
+        if (firebase.user != null) {
             val goalsActivityIntent = Intent(this, GoalsActivity::class.java)
-            Log.d(TAG, "user is logged in: " + auth.currentUser.toString())
+            Log.d(TAG, "user is logged in: " + firebase.user.toString())
             startActivity(goalsActivityIntent)
         } else {
             val loginActivityIntent = Intent(this, LoginActivity::class.java)

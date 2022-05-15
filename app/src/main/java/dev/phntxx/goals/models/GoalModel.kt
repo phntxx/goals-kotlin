@@ -3,13 +3,13 @@ package dev.phntxx.goals.models
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ServerTimestamp
-import com.google.type.Date
 
 
 class GoalModel {
     var title: String? = null
     var imageUUID: String? = null
     var uid: String? = null
+    var tasks: Array<TaskModel>? = null
 
     @ServerTimestamp
     var timestamp: Timestamp? = null
@@ -22,11 +22,12 @@ class GoalModel {
         this.uid = uid
     }
 
-    constructor(name: String?, imageUUID: String?, uid: String?, timestamp: Timestamp?) {
+    constructor(name: String?, imageUUID: String?, uid: String?, timestamp: Timestamp?, tasks: Array<TaskModel>?) {
         this.title = name
         this.imageUUID = imageUUID
         this.uid = uid
         this.timestamp = timestamp
+        this.tasks = tasks
     }
 
     fun toMap(): Map<String, *> {
@@ -34,7 +35,8 @@ class GoalModel {
             "title" to this.title,
             "imageUUID" to this.imageUUID,
             "uid" to this.uid,
-            "timestamp" to this.timestamp
+            "timestamp" to this.timestamp,
+            "tasks" to this.tasks
         )
     }
 
@@ -44,8 +46,9 @@ class GoalModel {
             val imageUUID = snapshot.get("imageUUID") as String?
             val uid = snapshot.get("uid") as String?
             val timestamp = snapshot.get("timestamp") as Timestamp?
+            val tasks = snapshot.get("tasks") as Array<TaskModel>?
 
-            return GoalModel(title, imageUUID, uid, timestamp)
+            return GoalModel(title, imageUUID, uid, timestamp, tasks)
         }
     }
 }

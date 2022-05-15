@@ -9,21 +9,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
+import dev.phntxx.goals.adapters.FirebaseAdapter
 import dev.phntxx.goals.databinding.ActivityNewGoalBinding
 import dev.phntxx.goals.models.GoalModel
 import java.util.*
 
 class NewGoalActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var database: FirebaseFirestore
-    private lateinit var storage: FirebaseStorage
+    private lateinit var firebase: FirebaseAdapter
     private lateinit var binding: ActivityNewGoalBinding
 
     private var editMode: Boolean = false
@@ -34,20 +28,29 @@ class NewGoalActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        auth = Firebase.auth
-        database = Firebase.firestore
-        storage = FirebaseStorage.getInstance()
-
+        firebase = FirebaseAdapter()
         binding = ActivityNewGoalBinding.inflate(layoutInflater)
         editMode = intent.hasExtra("editMode")
 
-        goal.uid = auth.currentUser!!.uid
+        goal.uid = firebase.userId
 
         setContentView(binding.root)
 
         if (editMode) {
             val goalId = intent.getStringExtra("goalId")!!
-            this.getGoal(goalId)
+
+            firebase.getGoal(goalId, {
+                this.goal = it
+                binding.goalTitle.setText(this.goal.title)
+
+                Log.d(TAG, this.goal.imageUUID.toString())
+
+                if (this.goal.imageUUID != null) {
+                    Glide.with(this)
+                        .load(firebase.getStorageRef(this.goal.imageUUID!!))
+                        .into(binding.goalImageView)
+                }
+            })
         }
 
         binding.saveButton.setOnClickListener {
@@ -85,7 +88,7 @@ class NewGoalActivity : AppCompatActivity() {
 
     private fun uploadImage(uri: Uri) {
         val uuid = UUID.randomUUID().toString()
-        val ref = storage.getReference("images").child(uuid)
+        val ref = firebase.getStorageRef(uuid)
 
         ref
             .putFile(uri)
@@ -105,50 +108,21 @@ class NewGoalActivity : AppCompatActivity() {
         if (editMode) editGoal() else createNewGoal()
     }
 
-    private fun getGoal(goalId: String) {
-        database
-            .collection("goals")
-            .document(goalId)
-            .get()
-            .addOnSuccessListener {
-                this.goal = GoalModel.fromDocumentSnapshot(it)
-                binding.goalTitle.setText(this.goal.title)
-
-                Log.d(TAG, this.goal.imageUUID.toString())
-
-                if (this.goal.imageUUID != null) {
-                    Glide.with(this).asDrawable()
-                        .load(storage.getReference("images").child(this.goal.imageUUID!!))
-                        .into(binding.goalImageView)
-                }
-            }
-    }
 
     private fun createNewGoal() {
-        database
-            .collection("goals")
-            .add(goal)
-            .addOnFailureListener(defaultFailureListener)
-            .addOnSuccessListener {
-                Log.d(TAG, "DocumentSnapshot added with ID: ${it.id}")
-                val goalActivityIntent = Intent(this, GoalActivity::class.java)
-                goalActivityIntent.putExtra("goalId", it.id)
-                startActivity(goalActivityIntent)
-            }
+        firebase.createGoal(goal, {
+            Log.d(TAG, "DocumentSnapshot added with ID: ${it}")
+            val goalActivityIntent = Intent(this, GoalActivity::class.java)
+            goalActivityIntent.putExtra("goalId", it)
+            startActivity(goalActivityIntent)
+        }, defaultFailureListener)
     }
 
     private fun editGoal() {
         val goalId = intent.getStringExtra("goalId")!!
-
-        database
-            .collection("goals")
-            .document(goalId)
-            .update(this.goal.toMap())
-            .addOnFailureListener(defaultFailureListener)
-            .addOnSuccessListener {
-                Log.d(TAG, "Updated document with ID: $goalId")
-                finish()
-            }
+        firebase.updateGoal(goalId, this.goal, {
+            finish()
+        }, defaultFailureListener)
     }
 
     private val defaultFailureListener = OnFailureListener {

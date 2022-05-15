@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.phntxx.goals">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Goals">
         <activity
+            android:name=".NewTaskActivity"
+            android:exported="false" />
+        <activity
             android:name=".GoalActivity"
             android:exported="false"
             android:label="@string/my_goal"
@@ -19,8 +22,7 @@
         <activity
             android:name=".NewGoalActivity"
             android:exported="false"
-            android:label="@string/add_goal"
-            />
+            android:label="@string/add_goal" />
         <activity
             android:name=".GoalsActivity"
             android:exported="false"
@@ -30,13 +32,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:noHistory="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:noHistory="true" />
     </application>
 
 </manifest>
