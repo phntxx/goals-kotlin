@@ -1,14 +1,10 @@
 package dev.phntxx.goals
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -18,7 +14,6 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
 import dev.phntxx.goals.adapters.GoalAdapter
 import dev.phntxx.goals.databinding.ActivityGoalsBinding
-import dev.phntxx.goals.dialogs.GoalDialog
 import dev.phntxx.goals.models.GoalModel
 
 
@@ -29,13 +24,11 @@ class GoalsActivity : AppCompatActivity() {
     private lateinit var database: FirebaseFirestore
     private lateinit var adapter: GoalAdapter
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         auth = Firebase.auth
         database = Firebase.firestore
-
         binding = ActivityGoalsBinding.inflate(layoutInflater)
 
         val query = database
@@ -48,19 +41,27 @@ class GoalsActivity : AppCompatActivity() {
 
         adapter = GoalAdapter(options)
 
-        binding.goalsRecyclerview.layoutManager = LinearLayoutManager(this)
-        binding.goalsRecyclerview.adapter = adapter
+        binding.newGoalButton.setOnClickListener {
+            val intent = Intent(this, NewGoalActivity::class.java)
+            startActivity(intent)
+        }
 
-        binding.newGoalButton.setOnClickListener(GoalDialog(getString(R.string.add_goal)) {
-            createNewGoal(it)
-        })
-
+        /**
+         * I know that this is not doing anything, but I think that providing the user with
+         * the illusion of control in this sense (as Firestore should update automatically)
+         * makes for a better UX.
+         */
         binding.goalSwipeRefresh.setOnRefreshListener {
-            adapter.notifyDataSetChanged()
             binding.goalSwipeRefresh.isRefreshing = false
         }
 
         setContentView(binding.root)
+
+        binding.goalsRecyclerview.layoutManager = LinearLayoutManager(this)
+
+        // HELP: Why does this line need to be here in order for all of this to work?
+        binding.goalsRecyclerview.itemAnimator = null
+        binding.goalsRecyclerview.adapter = adapter
     }
 
     override fun onStart() {
@@ -87,30 +88,5 @@ class GoalsActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun createNewGoal(title: String) {
-        val goal = GoalModel(title, auth.currentUser!!.uid)
-
-        database.collection("goals")
-            .add(goal)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                val goalActivityIntent = Intent(this, GoalActivity::class.java)
-                goalActivityIntent.putExtra("goalId", documentReference.id)
-                startActivity(goalActivityIntent)
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-                Toast.makeText(
-                    applicationContext,
-                    getString(R.string.something_went_wrong),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-    }
-
-    companion object {
-        private const val TAG = "GoalsActivity"
     }
 }

@@ -21,11 +21,11 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         if (auth.currentUser != null) {
-            var goalsActivityIntent = Intent(this, GoalsActivity::class.java)
+            val goalsActivityIntent = Intent(this, GoalsActivity::class.java)
             Log.d(TAG, "user is logged in: " + auth.currentUser.toString())
             startActivity(goalsActivityIntent)
         } else {
-            var loginActivityIntent = Intent(this, LoginActivity::class.java)
+            val loginActivityIntent = Intent(this, LoginActivity::class.java)
             Log.d(TAG, "user is not logged in")
             startActivity(loginActivityIntent)
         }

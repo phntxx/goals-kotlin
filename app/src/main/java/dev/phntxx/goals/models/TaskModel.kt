@@ -17,6 +17,8 @@ class TaskModel {
     var funds: DoubleArray? = null
 
     var uid: String? = null
+
+    @ServerTimestamp
     var timestamp: Timestamp? = null
 
     constructor() {} // Needed for Firebase

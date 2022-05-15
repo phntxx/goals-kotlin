@@ -8,10 +8,6 @@
     android:layout_marginBottom="5dp"
     android:elevation="24dp">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refreshGoals"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -28,6 +24,6 @@
                 android:textSize="20sp" />
 
         </RelativeLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </androidx.cardview.widget.CardView>
