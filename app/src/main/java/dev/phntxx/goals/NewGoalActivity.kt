@@ -8,12 +8,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.gms.tasks.OnFailureListener
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.OnProgressListener
+import com.google.firebase.storage.UploadTask
 import dev.phntxx.goals.adapters.FirebaseAdapter
 import dev.phntxx.goals.databinding.ActivityNewGoalBinding
 import dev.phntxx.goals.models.GoalModel
-import java.util.*
 
 class NewGoalActivity : AppCompatActivity() {
 
@@ -43,11 +44,12 @@ class NewGoalActivity : AppCompatActivity() {
                 this.goal = it
                 binding.goalTitle.setText(this.goal.title)
 
-                Log.d(TAG, this.goal.imageUUID.toString())
-
                 if (this.goal.imageUUID != null) {
+
                     Glide.with(this)
                         .load(firebase.getStorageRef(this.goal.imageUUID!!))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
                         .into(binding.goalImageView)
                 }
             })
@@ -64,7 +66,7 @@ class NewGoalActivity : AppCompatActivity() {
                 binding.goalTitle.error = getString(R.string.goal_title_length)
             } else {
                 this.goal.title = binding.goalTitle.text.toString()
-                if (this.imageUri != null) uploadImage(this.imageUri!!) else finalize()
+                if (editMode) editGoal() else createGoal()
             }
         }
 
@@ -73,12 +75,55 @@ class NewGoalActivity : AppCompatActivity() {
         }
 
         binding.resetImageButton.setOnClickListener {
-            binding.goalImageView.setImageURI(null)
+            binding.goalImageView.setImageDrawable(null)
         }
 
         binding.cancelButton.setOnClickListener {
             finish()
         }
+    }
+
+    private fun createGoal() {
+        // ImageURI exists => Drawable exists
+        // Drawable does not exist => No change
+
+        // imageURI exists => Image needs to be uploaded
+        if (this.imageUri != null) {
+            uploadImage(this.imageUri!!)
+        }
+
+        firebase.createGoal(goal, {
+            Log.d(TAG, "DocumentSnapshot added with ID: $it")
+            val goalActivityIntent = Intent(this, GoalActivity::class.java)
+            goalActivityIntent.putExtra("goalId", it)
+            startActivity(goalActivityIntent)
+        }, defaultFailureListener)
+    }
+
+    private fun editGoal() {
+        val drawableExists = (this.binding.goalImageView.drawable != null)
+        val goalUUIDExists = (this.goal.imageUUID != null)
+        val imageURIExists = (this.imageUri != null)
+
+        // Drawable exists & ImageURI does not exist => Image needs to be kept => No change
+
+        // Drawable exists & ImageURI exists => Image needs to be replaced
+        if (goalUUIDExists && imageURIExists) {
+            firebase.updateGoalImage(this.goal.imageUUID!!, this.imageUri!!, {}, defaultProgressListener)
+        }
+
+        // Drawable does not exist => Image needs to be removed
+        if (!drawableExists && goalUUIDExists) {
+            firebase.deleteGoalImage(this.goal.imageUUID!!, {
+                this.goal.imageUUID = null
+            })
+        }
+
+        val goalId = intent.getStringExtra("goalId")!!
+
+        firebase.updateGoal(goalId, this.goal, {
+            finish()
+        }, defaultFailureListener)
     }
 
     private val loadImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
@@ -87,42 +132,15 @@ class NewGoalActivity : AppCompatActivity() {
     }
 
     private fun uploadImage(uri: Uri) {
-        val uuid = UUID.randomUUID().toString()
-        val ref = firebase.getStorageRef(uuid)
-
-        ref
-            .putFile(uri)
-            .addOnFailureListener(defaultFailureListener)
-            .addOnProgressListener {
-                Toast
-                    .makeText(applicationContext, R.string.uploading_image_progress, Toast.LENGTH_SHORT)
-                    .show()
-            }
-            .addOnSuccessListener {
-                this.goal.imageUUID = uuid
-                finalize()
-            }
+        firebase.uploadGoalImage(uri, {
+            this.goal.imageUUID = it
+        }, defaultProgressListener, defaultFailureListener)
     }
 
-    private fun finalize() {
-        if (editMode) editGoal() else createNewGoal()
-    }
-
-
-    private fun createNewGoal() {
-        firebase.createGoal(goal, {
-            Log.d(TAG, "DocumentSnapshot added with ID: ${it}")
-            val goalActivityIntent = Intent(this, GoalActivity::class.java)
-            goalActivityIntent.putExtra("goalId", it)
-            startActivity(goalActivityIntent)
-        }, defaultFailureListener)
-    }
-
-    private fun editGoal() {
-        val goalId = intent.getStringExtra("goalId")!!
-        firebase.updateGoal(goalId, this.goal, {
-            finish()
-        }, defaultFailureListener)
+    private val defaultProgressListener = OnProgressListener<UploadTask.TaskSnapshot> {
+        Toast
+            .makeText(applicationContext, R.string.uploading_image_progress, Toast.LENGTH_SHORT)
+            .show()
     }
 
     private val defaultFailureListener = OnFailureListener {

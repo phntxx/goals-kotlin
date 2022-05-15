@@ -1,5 +1,6 @@
 package dev.phntxx.goals.adapters
 
+import android.net.Uri
 import android.util.Log
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.gms.tasks.OnFailureListener
@@ -8,8 +9,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.OnProgressListener
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import dev.phntxx.goals.models.GoalModel
+import java.util.*
 
 class FirebaseAdapter {
 
@@ -51,9 +55,47 @@ class FirebaseAdapter {
     }
 
     fun deleteGoal(goalId: String, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        getGoal(goalId, {
+            if (it.imageUUID != null) deleteGoalImage(it.imageUUID!!)
+        })
+
         database
             .collection("goals")
             .document(goalId)
+            .delete()
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun uploadGoalImage(uri: Uri, onSuccessListener: OnSuccessListener<String>, onProgressListener: OnProgressListener<UploadTask.TaskSnapshot>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        val uuid = UUID.randomUUID().toString()
+        val ref = getStorageRef(uuid)
+
+        ref
+            .putFile(uri)
+            .addOnSuccessListener {
+                onSuccessListener.onSuccess(uuid)
+            }
+            .addOnProgressListener(onProgressListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun updateGoalImage(uuid: String, uri: Uri, onSuccessListener: OnSuccessListener<String>, onProgressListener: OnProgressListener<UploadTask.TaskSnapshot>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        val ref = getStorageRef(uuid)
+
+        ref
+            .putFile(uri)
+            .addOnSuccessListener {
+                onSuccessListener.onSuccess(uuid)
+            }
+            .addOnProgressListener(onProgressListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun deleteGoalImage(uuid: String, onSuccessListener: OnSuccessListener<Void> = emptyOnSuccessListener, onFailureListener: OnFailureListener = defaultFailureListener) {
+        val ref = getStorageRef(uuid)
+
+        ref
             .delete()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
@@ -77,6 +119,10 @@ class FirebaseAdapter {
 
     fun signOut() {
         auth.signOut()
+    }
+
+    private val emptyOnSuccessListener = OnSuccessListener<Void> {
+        Log.d(TAG, "Success!")
     }
 
     private val defaultFailureListener = OnFailureListener {
