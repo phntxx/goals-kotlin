@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dev.phntxx.goals.adapters.FirebaseAdapter
-import dev.phntxx.goals.adapters.GlideAdapter
+import dev.phntxx.goals.adapters.TaskAdapter
 import dev.phntxx.goals.databinding.ActivityGoalBinding
 import dev.phntxx.goals.models.GoalModel
 
@@ -18,23 +18,23 @@ class GoalActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGoalBinding
     private lateinit var firebase: FirebaseAdapter
+    private lateinit var adapter: TaskAdapter
     private lateinit var goal: GoalModel
+    private lateinit var goalId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        goalId = intent.getStringExtra("goalId")!!
+
         firebase = FirebaseAdapter()
         binding = ActivityGoalBinding.inflate(layoutInflater)
+
+        adapter = firebase.buildTaskAdapter(goalId)
 
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        binding.fab.setOnClickListener {
-            val intent = Intent(this, NewTaskActivity::class.java)
-            startActivity(intent)
-        }
-
-        val goalId = intent.getStringExtra("goalId")!!
         firebase.getGoal(goalId, {
             this.goal = it
             binding.toolbarLayout.title = this.goal.title
@@ -49,6 +49,20 @@ class GoalActivity : AppCompatActivity() {
         }, {
             finish()
         })
+
+        binding.fab.setOnClickListener {
+            val intent = Intent(this, NewTaskActivity::class.java)
+            intent.putExtra("goalId", goalId)
+            startActivity(intent)
+        }
+
+        binding.taskRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.taskRecyclerView.adapter = adapter
+    }
+
+    override fun onStart() {
+        super.onStart()
+        adapter.startListening()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

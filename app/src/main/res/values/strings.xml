@@ -11,7 +11,16 @@
     <string name="delete_goal">Delete goal</string>
     <string name="goal_title_length">Goal must have a title.</string>
 
+    <string name="tasks">Tasks</string>
     <string name="add_task">Add task</string>
+    <string name="task_name">Task name</string>
+    <string name="task_description">Task description</string>
+    <string name="fundraiser">Fundraiser</string>
+    <string name="needed_funds">Needed funds</string>
+    <string name="available_funds">Available funds</string>
+    <string name="critical_task">Critical task</string>
+    <string name="task_criticality">Task criticality</string>
+    <string name="location">Location</string>
 
     <string name="log_out">Log out</string>
     <string name="save">Save</string>

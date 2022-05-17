@@ -11,18 +11,19 @@
         <entry key="app/src/main/res/layout-w936dp/activity_login.xml" value="0.17119357306809488" />
         <entry key="app/src/main/res/layout-w936dp/content_scrolling.xml" value="0.20833333333333334" />
         <entry key="app/src/main/res/layout/activity_add_goal.xml" value="0.3880208333333333" />
-        <entry key="app/src/main/res/layout/activity_goal.xml" value="0.276268115942029" />
+        <entry key="app/src/main/res/layout/activity_goal.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_goals.xml" value="0.26049499511718754" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.25638783772786455" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2707504272460938" />
         <entry key="app/src/main/res/layout/activity_new_goal.xml" value="0.276268115942029" />
-        <entry key="app/src/main/res/layout/activity_new_task.xml" value="0.10131712259371833" />
+        <entry key="app/src/main/res/layout/activity_new_task.xml" value="0.3042941123398123" />
         <entry key="app/src/main/res/layout/content_goals.xml" value="0.3880208333333333" />
         <entry key="app/src/main/res/layout/content_scrolling.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.18796296296296297" />
         <entry key="app/src/main/res/layout/goal_card.xml" value="0.3746810913085938" />
         <entry key="app/src/main/res/layout/goal_content_scrolling.xml" value="0.276268115942029" />
         <entry key="app/src/main/res/layout/sample_goal_card.xml" value="0.3988845825195313" />
+        <entry key="app/src/main/res/layout/task_card.xml" value="0.29891304347826086" />
         <entry key="app/src/main/res/menu/menu_goal.xml" value="0.4741470336914062" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2565" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2565" />

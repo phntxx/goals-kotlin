@@ -1,32 +1,23 @@
 package dev.phntxx.goals.models
 
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ServerTimestamp
+
+import com.google.firebase.database.DataSnapshot
+
 
 
 class GoalModel {
     var title: String? = null
     var imageUUID: String? = null
     var uid: String? = null
-    var tasks: Array<TaskModel>? = null
-
-    @ServerTimestamp
-    var timestamp: Timestamp? = null
+    var tasks: HashMap<String, *>? = null
 
     // Needed for Firebase
     constructor() {}
 
-    constructor(name: String?, uid: String?) {
-        this.title = name
-        this.uid = uid
-    }
-
-    constructor(name: String?, imageUUID: String?, uid: String?, timestamp: Timestamp?, tasks: Array<TaskModel>?) {
+    constructor(name: String?, imageUUID: String?, uid: String?, tasks: HashMap<String, *>?) {
         this.title = name
         this.imageUUID = imageUUID
         this.uid = uid
-        this.timestamp = timestamp
         this.tasks = tasks
     }
 
@@ -35,20 +26,19 @@ class GoalModel {
             "title" to this.title,
             "imageUUID" to this.imageUUID,
             "uid" to this.uid,
-            "timestamp" to this.timestamp,
             "tasks" to this.tasks
         )
     }
 
     companion object {
-        fun fromDocumentSnapshot(snapshot: DocumentSnapshot): GoalModel {
-            val title = snapshot.get("title") as String?
-            val imageUUID = snapshot.get("imageUUID") as String?
-            val uid = snapshot.get("uid") as String?
-            val timestamp = snapshot.get("timestamp") as Timestamp?
-            val tasks = snapshot.get("tasks") as Array<TaskModel>?
 
-            return GoalModel(title, imageUUID, uid, timestamp, tasks)
+        fun fromDataSnapshot(snapshot: DataSnapshot): GoalModel {
+            val title = snapshot.child("title").value as String?
+            val imageUUID = snapshot.child("imageUUID").value as String?
+            val uid = snapshot.child("uid").value as String?
+            val tasks = snapshot.child("tasks").value as HashMap<String, *>?
+
+            return GoalModel(title, imageUUID, uid, tasks)
         }
     }
 }

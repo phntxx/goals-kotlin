@@ -2,56 +2,58 @@ package dev.phntxx.goals.adapters
 
 import android.net.Uri
 import android.util.Log
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.OnProgressListener
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import dev.phntxx.goals.models.GoalModel
+import dev.phntxx.goals.models.TaskModel
 import java.util.*
 
 class FirebaseAdapter {
 
     private var auth = Firebase.auth
-    private var database = Firebase.firestore
+    private var database = Firebase.database
+    private var ref = database.getReference("goals")
     private var storage = FirebaseStorage.getInstance()
 
     var user = auth.currentUser
     var userId = user!!.uid
 
     fun getGoal(goalId: String, onSuccessListener: OnSuccessListener<GoalModel>, onFailureListener: OnFailureListener = defaultFailureListener) {
-        database
-            .collection("goals")
-            .document(goalId)
+        ref
+            .child(goalId)
             .get()
             .addOnSuccessListener {
-                onSuccessListener.onSuccess(GoalModel.fromDocumentSnapshot(it))
+                onSuccessListener.onSuccess(GoalModel.fromDataSnapshot(it))
             }
             .addOnFailureListener(onFailureListener)
     }
 
     fun createGoal(goal: GoalModel, onSuccessListener: OnSuccessListener<String>, onFailureListener: OnFailureListener = defaultFailureListener) {
-        database
-            .collection("goals")
-            .add(goal)
-            .addOnSuccessListener{
-                onSuccessListener.onSuccess(it.id)
+        val pushKey = ref.push().key ?: ""
+
+        ref
+            .child(pushKey)
+            .setValue(goal)
+            .addOnSuccessListener {
+                onSuccessListener.onSuccess(pushKey)
             }
             .addOnFailureListener(onFailureListener)
     }
 
-    fun updateGoal(goalId: String, goal: GoalModel, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
-        database
-            .collection("goals")
-            .document(goalId)
-            .update(goal.toMap())
-            .addOnFailureListener(onFailureListener)
+    fun updateGoal(goalId: String, goal: GoalModel, onSuccessListener: OnSuccessListener<Void> = emptyOnSuccessListener, onFailureListener: OnFailureListener = defaultFailureListener) {
+        ref
+            .child(goalId)
+            .updateChildren(goal.toMap())
             .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
     }
 
     fun deleteGoal(goalId: String, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
@@ -59,10 +61,9 @@ class FirebaseAdapter {
             if (it.imageUUID != null) deleteGoalImage(it.imageUUID!!)
         })
 
-        database
-            .collection("goals")
-            .document(goalId)
-            .delete()
+        ref
+            .child(goalId)
+            .removeValue()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
     }
@@ -101,16 +102,53 @@ class FirebaseAdapter {
             .addOnFailureListener(onFailureListener)
     }
 
-    fun buildGoalAdapter(): GoalAdapter {
-        val query = database
-            .collection("goals")
-            .whereEqualTo("uid", userId)
+    fun addTasktoGoal(goalId: String, task: TaskModel, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        val pushKey = ref.push().key ?: ""
+        task.key = pushKey
 
-        val options = FirestoreRecyclerOptions.Builder<GoalModel>()
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(pushKey)
+            .setValue(task)
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun removeTaskFromGoal(goalId: String, task: TaskModel, onSuccessListener: OnSuccessListener<Void> = emptyOnSuccessListener, onFailureListener: OnFailureListener = defaultFailureListener) {
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(task.key ?: "")
+            .removeValue()
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun buildGoalAdapter(): GoalAdapter {
+        val query = ref
+            .orderByChild("uid")
+            .equalTo(userId)
+
+        val options = FirebaseRecyclerOptions.Builder<GoalModel>()
             .setQuery(query, GoalModel::class.java)
             .build()
 
         return GoalAdapter(options)
+    }
+
+    fun buildTaskAdapter(goalId: String): TaskAdapter {
+        val query = ref
+            .child(goalId)
+            .child("tasks")
+
+        Log.d(TAG, query.toString())
+
+        val options = FirebaseRecyclerOptions.Builder<TaskModel>()
+            .setQuery(query, TaskModel::class.java)
+            .build()
+
+        return TaskAdapter(options)
     }
 
     fun getStorageRef(uuid: String): StorageReference {

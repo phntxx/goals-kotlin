@@ -90,14 +90,9 @@ class NewGoalActivity : AppCompatActivity() {
         // imageURI exists => Image needs to be uploaded
         if (this.imageUri != null) {
             uploadImage(this.imageUri!!)
+        } else {
+            uploadGoal()
         }
-
-        firebase.createGoal(goal, {
-            Log.d(TAG, "DocumentSnapshot added with ID: $it")
-            val goalActivityIntent = Intent(this, GoalActivity::class.java)
-            goalActivityIntent.putExtra("goalId", it)
-            startActivity(goalActivityIntent)
-        }, defaultFailureListener)
     }
 
     private fun editGoal() {
@@ -126,6 +121,15 @@ class NewGoalActivity : AppCompatActivity() {
         }, defaultFailureListener)
     }
 
+    private fun uploadGoal () {
+        firebase.createGoal(goal, {
+            Log.d(TAG, "DocumentSnapshot added with ID: $it")
+            val goalActivityIntent = Intent(this, GoalActivity::class.java)
+            goalActivityIntent.putExtra("goalId", it)
+            startActivity(goalActivityIntent)
+        }, defaultFailureListener)
+    }
+
     private val loadImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
         imageUri = it
         binding.goalImageView.setImageURI(it)
@@ -134,6 +138,7 @@ class NewGoalActivity : AppCompatActivity() {
     private fun uploadImage(uri: Uri) {
         firebase.uploadGoalImage(uri, {
             this.goal.imageUUID = it
+            uploadGoal()
         }, defaultProgressListener, defaultFailureListener)
     }
 
