@@ -6,9 +6,9 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.phntxx.goals.adapters.FirebaseAdapter
-
 import dev.phntxx.goals.adapters.GoalAdapter
 import dev.phntxx.goals.databinding.ActivityGoalsBinding
+
 
 class GoalsActivity : AppCompatActivity() {
 
@@ -20,20 +20,14 @@ class GoalsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         firebase = FirebaseAdapter()
-        binding = ActivityGoalsBinding.inflate(layoutInflater)
-
         adapter = firebase.buildGoalAdapter()
+        binding = ActivityGoalsBinding.inflate(layoutInflater)
 
         binding.newGoalButton.setOnClickListener {
             val intent = Intent(this, NewGoalActivity::class.java)
             startActivity(intent)
         }
 
-        /**
-         * I know that this is not doing anything, but I think that providing the user with
-         * the illusion of control in this sense (as Firestore should update automatically)
-         * makes for a better UX.
-         */
         binding.goalSwipeRefresh.setOnRefreshListener {
             binding.goalSwipeRefresh.isRefreshing = false
         }
@@ -41,10 +35,11 @@ class GoalsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.goalsRecyclerview.layoutManager = LinearLayoutManager(this)
-
-        // HELP: Why does this line need to be here in order for all of this to work?
         binding.goalsRecyclerview.itemAnimator = null
         binding.goalsRecyclerview.adapter = adapter
+        adapter
+            .buildItemTouchHelper(this)
+            .attachToRecyclerView(binding.goalsRecyclerview)
     }
 
     override fun onStart() {

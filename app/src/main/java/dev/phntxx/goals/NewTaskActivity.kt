@@ -8,6 +8,7 @@ import android.widget.Toast
 import dev.phntxx.goals.adapters.FirebaseAdapter
 import dev.phntxx.goals.databinding.ActivityGoalsBinding
 import dev.phntxx.goals.databinding.ActivityNewTaskBinding
+import dev.phntxx.goals.models.Status
 import dev.phntxx.goals.models.TaskModel
 
 class NewTaskActivity : AppCompatActivity() {
@@ -35,9 +36,9 @@ class NewTaskActivity : AppCompatActivity() {
             if (inputValidation()) {
                 val goalId: String = intent.getStringExtra("goalId")!!
 
-                var funds: DoubleArray? = null
+                var funds: List<Double>? = null
                 if (binding.fundraiser.isChecked) {
-                    funds = doubleArrayOf(
+                    funds = listOf(
                         binding.availableFunds.text.toString().toDouble(),
                         binding.neededFunds.text.toString().toDouble()
                     )
@@ -49,6 +50,7 @@ class NewTaskActivity : AppCompatActivity() {
                     binding.critical.isChecked,
                     null, // location not implemented yet
                     funds,
+                    Status.IN_PROGRESS.value
                 )
 
                 firebase.addTasktoGoal(goalId, task, {

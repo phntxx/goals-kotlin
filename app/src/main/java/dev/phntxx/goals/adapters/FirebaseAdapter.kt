@@ -24,7 +24,7 @@ class FirebaseAdapter {
     private var storage = FirebaseStorage.getInstance()
 
     var user = auth.currentUser
-    var userId = user!!.uid
+    var userId = user?.uid
 
     fun getGoal(goalId: String, onSuccessListener: OnSuccessListener<GoalModel>, onFailureListener: OnFailureListener = defaultFailureListener) {
         ref
@@ -155,9 +155,7 @@ class FirebaseAdapter {
         return storage.getReference("images").child(uuid)
     }
 
-    fun signOut() {
-        auth.signOut()
-    }
+    fun signOut() = auth.signOut()
 
     private val emptyOnSuccessListener = OnSuccessListener<Void> {
         Log.d(TAG, "Success!")

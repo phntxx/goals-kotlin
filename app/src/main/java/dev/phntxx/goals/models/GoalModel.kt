@@ -14,11 +14,12 @@ class GoalModel {
     // Needed for Firebase
     constructor() {}
 
-    constructor(name: String?, imageUUID: String?, uid: String?, tasks: HashMap<String, *>?) {
+    //constructor(name: String?, imageUUID: String?, uid: String?, tasks: HashMap<String, *>?) {
+    constructor(name: String?, imageUUID: String?, uid: String?) {
         this.title = name
         this.imageUUID = imageUUID
         this.uid = uid
-        this.tasks = tasks
+        //this.tasks = tasks
     }
 
     fun toMap(): Map<String, *> {
@@ -36,9 +37,10 @@ class GoalModel {
             val title = snapshot.child("title").value as String?
             val imageUUID = snapshot.child("imageUUID").value as String?
             val uid = snapshot.child("uid").value as String?
-            val tasks = snapshot.child("tasks").value as HashMap<String, *>?
+            //val tasks = snapshot.child("tasks").value as HashMap<String, *>?
 
-            return GoalModel(title, imageUUID, uid, tasks)
+            //return GoalModel(title, imageUUID, uid, tasks)
+            return GoalModel(title, imageUUID, uid)
         }
     }
 }

@@ -2,11 +2,15 @@ package dev.phntxx.goals
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dev.phntxx.goals.adapters.FirebaseAdapter
@@ -57,12 +61,18 @@ class GoalActivity : AppCompatActivity() {
         }
 
         binding.taskRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.taskRecyclerView.itemAnimator = null
         binding.taskRecyclerView.adapter = adapter
     }
 
     override fun onStart() {
         super.onStart()
         adapter.startListening()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        adapter.stopListening()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

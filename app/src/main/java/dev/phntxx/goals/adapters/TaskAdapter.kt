@@ -1,6 +1,5 @@
 package dev.phntxx.goals.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -19,17 +18,17 @@ class TaskAdapter(options: FirebaseRecyclerOptions<TaskModel>): FirebaseRecycler
     }
 
     override fun onBindViewHolder(holder: MainHolder, position: Int, model: TaskModel) {
-        Log.d("TESTING", model.title ?: "fuck...")
         holder.bind(model, position)
+    }
+
+    fun removeItem(position: Int) {
+        snapshots.getSnapshot(position).ref.removeValue()
     }
 
     inner class MainHolder(private val binding : TaskCardBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(task: TaskModel, position: Int) {
-
-            if (task.critical == true) {
-                binding.taskCritical.setText(R.string.critical_task)
-            }
+            if (task.critical == true) binding.taskCritical.setText(R.string.critical_task)
 
             binding.taskName.text = task.title
             binding.taskDescription.text = task.description
