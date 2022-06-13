@@ -1,9 +1,16 @@
 package dev.phntxx.goals.models
 
-enum class Status(val value: Int?) {
-    IN_PROGRESS(null),
-    COMPLETED(2),
-    FAILED(3)
+enum class Status(val value: Int) {
+    IN_PROGRESS(0),
+    COMPLETED(1),
+    FAILED(2);
+
+    companion object {
+        fun fromValue(value: Int): Status {
+            val mapping = values().associateBy(Status::value)
+            return mapping[value]!!
+        }
+    }
 }
 
 class TaskModel {
@@ -13,20 +20,19 @@ class TaskModel {
 
     var critical: Boolean? = null
 
-    var location: String? = null
+    var location: List<Double>? = null
     var funds: List<Double>? = null
-    var key: String? = null
-    var status: Int? = Status.IN_PROGRESS.value
+    var status: Int = Status.IN_PROGRESS.value
 
     constructor() {} // Needed for Firebase
 
-    constructor(name: String?, description: String?, critical: Boolean?, location: String?, funds: List<Double>?, status: Int?) {
+    constructor(name: String?, description: String?, critical: Boolean?, location: List<Double>?, funds: List<Double>?, status: Int?) {
         this.title = name
         this.description = description
         this.critical = critical
         this.location = location
         this.funds = funds
-        this.status = status
+        this.status = status ?: Status.IN_PROGRESS.value
     }
 
     fun toMap(): Map<String, *> {
