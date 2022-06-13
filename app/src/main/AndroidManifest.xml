@@ -16,6 +16,7 @@
         <activity
             android:name=".TaskActivity"
             android:exported="false"
+            android:foregroundServiceType="location"
         />
 
         <meta-data

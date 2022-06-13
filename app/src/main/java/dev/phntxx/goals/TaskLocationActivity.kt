@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Camera
 import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
@@ -64,7 +65,7 @@ class TaskLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                     userLocation = locationList.last()
 
                     val latLng = LatLng(userLocation?.latitude ?: 0.0, userLocation?.longitude ?: 0.0)
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11.0F))
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11.0F))
                 }
             }
         })
@@ -96,10 +97,8 @@ class TaskLocationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (granted) {
             googleMap.isMyLocationEnabled = true
-            googleMap.isMyLocationEnabled = true
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
             googleMap.uiSettings.isZoomControlsEnabled = true
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 1000, null)
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
             googleMap.setOnCameraMoveListener {
                 if (marker != null) {
                     this.markerLocation = googleMap.cameraPosition.target
