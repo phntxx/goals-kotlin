@@ -13,6 +13,7 @@ import com.google.firebase.storage.OnProgressListener
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import dev.phntxx.goals.models.GoalModel
+import dev.phntxx.goals.models.Status
 import dev.phntxx.goals.models.TaskModel
 import java.util.*
 
@@ -31,7 +32,69 @@ class FirebaseAdapter {
             .child(goalId)
             .get()
             .addOnSuccessListener {
-                onSuccessListener.onSuccess(GoalModel.fromDataSnapshot(it))
+                val goal: GoalModel = it.getValue(GoalModel::class.java)!!
+                onSuccessListener.onSuccess(goal)
+            }
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun getTask(goalId: String, taskId: String, onSuccessListener: OnSuccessListener<TaskModel>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(taskId)
+            .get()
+            .addOnSuccessListener {
+                val task: TaskModel = it.getValue(TaskModel::class.java)!!
+                onSuccessListener.onSuccess(task)
+            }
+            .addOnFailureListener(onFailureListener)
+    }
+
+    private fun increment(map: MutableMap<String, Int>, field: String) {
+        map[field] = map.getValue(field) + 1
+    }
+
+    fun getTaskStatistics(goalId: String, onSuccessListener: OnSuccessListener<Map<String, Int>>, onFailureListener: OnFailureListener = defaultFailureListener) {
+
+        ref
+            .child(goalId)
+            .child("tasks")
+            .get()
+            .addOnSuccessListener {
+
+                val stats = mutableMapOf(
+                    "total" to it.childrenCount.toInt(),
+                    "total_noncritical" to 0,
+                    "total_critical" to 0,
+                    "in_progress" to 0,
+                    "in_progress_critical" to 0,
+                    "completed" to 0,
+                    "completed_critical" to 0,
+                    "failed" to 0,
+                    "failed_critical" to 0
+                )
+
+                it.children.forEach { child ->
+                    val task = child.getValue(TaskModel::class.java)!!
+                    val status = Status.fromValue(task.status)
+
+                    if (task.critical == true) {
+                        increment(stats, "total_critical")
+
+                        if (status == Status.IN_PROGRESS) increment(stats, "in_progress_critical")
+                        if (status == Status.COMPLETED) increment(stats, "completed_critical")
+                        if (status == Status.FAILED) increment(stats, "failed_critical")
+                    } else {
+                        increment(stats, "total_noncritical")
+
+                        if (status == Status.IN_PROGRESS) increment(stats, "in_progress")
+                        if (status == Status.COMPLETED) increment(stats, "completed")
+                        if (status == Status.FAILED) increment(stats, "failed")
+                    }
+                }
+
+                onSuccessListener.onSuccess(stats.toMap())
             }
             .addOnFailureListener(onFailureListener)
     }
@@ -48,10 +111,33 @@ class FirebaseAdapter {
             .addOnFailureListener(onFailureListener)
     }
 
+    fun createTask(goalId: String, task: TaskModel, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        val pushKey = ref.push().key ?: ""
+
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(pushKey)
+            .setValue(task)
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
     fun updateGoal(goalId: String, goal: GoalModel, onSuccessListener: OnSuccessListener<Void> = emptyOnSuccessListener, onFailureListener: OnFailureListener = defaultFailureListener) {
         ref
             .child(goalId)
             .updateChildren(goal.toMap())
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun updateTaskStatus(goalId: String, taskId: String, status: Int, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(taskId)
+            .child("status")
+            .setValue(status)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
     }
@@ -63,6 +149,16 @@ class FirebaseAdapter {
 
         ref
             .child(goalId)
+            .removeValue()
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun deleteTask(goalId: String, taskId: String, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
+        ref
+            .child(goalId)
+            .child("tasks")
+            .child(taskId)
             .removeValue()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
@@ -102,29 +198,6 @@ class FirebaseAdapter {
             .addOnFailureListener(onFailureListener)
     }
 
-    fun addTasktoGoal(goalId: String, task: TaskModel, onSuccessListener: OnSuccessListener<Void>, onFailureListener: OnFailureListener = defaultFailureListener) {
-        val pushKey = ref.push().key ?: ""
-        task.key = pushKey
-
-        ref
-            .child(goalId)
-            .child("tasks")
-            .child(pushKey)
-            .setValue(task)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-    }
-
-    fun removeTaskFromGoal(goalId: String, task: TaskModel, onSuccessListener: OnSuccessListener<Void> = emptyOnSuccessListener, onFailureListener: OnFailureListener = defaultFailureListener) {
-        ref
-            .child(goalId)
-            .child("tasks")
-            .child(task.key ?: "")
-            .removeValue()
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-    }
-
     fun buildGoalAdapter(): GoalAdapter {
         val query = ref
             .orderByChild("uid")
@@ -142,13 +215,11 @@ class FirebaseAdapter {
             .child(goalId)
             .child("tasks")
 
-        Log.d(TAG, query.toString())
-
         val options = FirebaseRecyclerOptions.Builder<TaskModel>()
             .setQuery(query, TaskModel::class.java)
             .build()
 
-        return TaskAdapter(options)
+        return TaskAdapter(options, goalId)
     }
 
     fun getStorageRef(uuid: String): StorageReference {

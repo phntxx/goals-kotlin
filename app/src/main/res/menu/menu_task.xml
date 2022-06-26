@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="dev.phntxx.goals.TaskActivity">
+    <item
+        android:id="@+id/edit_task_option"
+        android:icon="@drawable/ic_baseline_log_out_24"
+        android:orderInCategory="100"
+        android:title="@string/edit_task"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/delete_task_option"
+        android:icon="@drawable/ic_baseline_log_out_24"
+        android:orderInCategory="100"
+        android:title="@string/delete_task"
+        app:showAsAction="never" />
+</menu>

@@ -59,11 +59,11 @@ class GoalAdapter(options: FirebaseRecyclerOptions<GoalModel>) : FirebaseRecycle
         fun bind(goal: GoalModel, position: Int) {
             binding.goalTitle.text = goal.title
 
-            binding.root.setOnClickListener { view ->
+            binding.root.setOnClickListener {
                 val goalId = snapshots.getSnapshot(position).key
-                val goalActivityIntent = Intent(view.context, GoalActivity::class.java)
+                val goalActivityIntent = Intent(it.context, GoalActivity::class.java)
                 goalActivityIntent.putExtra("goalId", goalId)
-                view.context.startActivity(goalActivityIntent)
+                it.context.startActivity(goalActivityIntent)
             }
         }
     }
