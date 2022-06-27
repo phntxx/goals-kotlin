@@ -23,8 +23,8 @@ jobs:
 
       - name: Add local properties
         env:
-          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
-        run: echo $LOCAL_PROPERTIES > local.properties
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: echo $GOOGLE_MAPS_API_KEY >> local.properties
 
       - name: Build
         run: ./gradlew build
