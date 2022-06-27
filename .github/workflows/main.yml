@@ -16,10 +16,15 @@ jobs:
         with:
           java-version: 11
 
-      - name: Add secrets
+      - name: Add google services
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo $GOOGLE_SERVICES > app/google-services.json
+
+      - name: Add local properties
+        env:
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+        run: echo $LOCAL_PROPERTIES > local.properties
 
       - name: Build
         run: ./gradlew build
