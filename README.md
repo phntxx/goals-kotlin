@@ -11,6 +11,8 @@ a simple app that helps you accomplish your goals.
 
 ## Diagrams
 
+The most critical thing to understand about this app is the system between goals and tasks. I've attached a UML diagram to help visualize this:
+
 ![Model Diagram](./img/uml.png)
 
 ## User- / Developer Experience
@@ -31,9 +33,13 @@ During this project, I tried to adopt a Trunk-Based Development approach (one br
 However, given that I drew out the initial phase of prototyping / developing a proof of concept too far, only one of these feature-branches is now
 actually visible in the git history.
 
+I've also created a GitHub Actions CI/CD Pipeline to ensure that every commit to GitHub is built and released on GitHub to embellish this idea of Trunk-Based Development.
+
 ## Personal statement
 
 Personally, I've learned a lot through attending this course. Given that I myself am mostly using Apple devices, seeing how things work on the Android side of things really widened my horizon.
+
+While I have previously dabbled with Firebase and the technologies it provides, seeing the performance of their software, as well as some of the features provided out of the box, I am simply fascinated at all of the things that are possible.
 
 ## References
 
